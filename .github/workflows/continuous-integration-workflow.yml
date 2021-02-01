@@ -1,0 +1,51 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Build and Deploy .dll To Server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x' # SDK Version to use; x will use the latest version of the 3.1 channel
+      - run: dotnet publish --configuration Release
+      - name: Empty /root/projects/ChrisfrewDotInApi/ folder on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            rm -R /root/projects/ChrisfrewDotInApi/**
+      - name: Copy bin/Release/net5.0/publish/ to the server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "bin/Release/net5.0/publish/"
+          target: "/root/projects/ChrisfrewDotInApi"
+          overwrite: true
+      - name: Pull newest repository source and restart (or start) node forever on the server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            sudo systemctl restart ChrisfrewDotInApi.service
+      - name: Send slack notification
+        uses: rtCamp/action-slack-notify@v2.0.0
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: "API build complete! Latest commit message:"
+          SLACK_ICON: "https://avatars.slack-edge.com/2021-02-01/1723555500368_e97655869409251d202e_96.jpg"
