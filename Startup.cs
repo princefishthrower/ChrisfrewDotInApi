@@ -33,7 +33,7 @@ namespace ChrisfrewDotInApi
                     options.AddPolicy(name: MyAllowSpecificOrigins,
                                       builder =>
                                       {
-                                          builder.WithOrigins("http://localhost:8000"
+                                          builder.WithOrigins("http://localhost:8000", "http://localhost:3000", "http://localhost:5000"
                                                            );
                                       });
                 });
@@ -70,6 +70,7 @@ namespace ChrisfrewDotInApi
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ChrisfrewDotInApi v1"));
+                app.UseHttpsRedirection();
             }
 
             app.UseRouting();
