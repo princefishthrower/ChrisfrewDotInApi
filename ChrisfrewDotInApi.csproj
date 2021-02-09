@@ -15,4 +15,7 @@
     <Folder Include="Services\" />
     <Folder Include="Infrastructure\" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Remove=".env.json" />
+  </ItemGroup>
 </Project>
