@@ -14,9 +14,8 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '5.0.x' # SDK Version to use; x will use the latest version of the 3.1 channel
-      - run: dotnet user-secrets init # Correct way would be to use Azure Vault, but this should work for now
-      - run: dotnet user-secrets set "LinkPreviewApiKey" ${{ secrets.LIVE_PREVIEW_API_KEY }}
       - run: dotnet publish --configuration Release
+      - run: "echo '{ \"LinkPreviewApiKey\": \"${{ secrets.LIVE_PREVIEW_API_KEY }}\" }' >> bin/Release/net5.0/publish/.env.json"
       - name: Empty /root/projects/ChrisfrewDotInApi/ folder on server
         uses: appleboy/ssh-action@master
         with:
